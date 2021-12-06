@@ -8,6 +8,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from .forms import NewsLetterForm
 from django.http import HttpResponse, Http404,HttpResponseRedirect
 from .email import send_welcome_email
+from django.contrib.auth.decorators import login_required
+from .forms import NewArticleForm, NewsLetterForm
 # Create your views here.
 def welcome(request):
     return render(request, 'welcome.html')
@@ -70,10 +72,24 @@ def search_results(request):
     else:
         message = "You haven't searched for any term"
         return render(request, 'all-news/search.html',{"message":message}) 
+@login_required(login_url='/accounts/login/')
 def article(request,article_id):
     try:
         article = Article.objects.get(id = article_id)
     except ObjectDoesNotExist as DoesNotExist:
         raise Http404()
     return render(request,"all-news/article.html", {"article":article})          
+login_required(login_url='/accounts/login/')
+def new_article(request):
+    current_user = request.user
+    if request.method == 'POST':
+        form = NewArticleForm(request.POST, request.FILES)
+        if form.is_valid():
+            article = form.save(commit=False)
+            article.editor = current_user
+            article.save()
+        return redirect('NewsToday')
 
+    else:
+        form = NewArticleForm()
+    return render(request, 'new_article.html', {"form": form})

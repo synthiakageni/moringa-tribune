@@ -35,6 +35,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'psycopg2',
     'news',
+    'tinymce',
     'bootstrap3',
     'django.contrib.admin',
     'django.contrib.auth',
